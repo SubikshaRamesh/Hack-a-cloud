@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTrack - Security</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f7;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .back-button {
+            color: #007aff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            flex: 1;
+        }
+
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #222;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 25px 0 10px;
+            color: #333;
+        }
+
+        p {
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .security-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007aff;
+        }
+
+        .security-card h3 {
+            color: #007aff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+        }
+
+        .security-card-icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .certification-icons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 25px 0;
+            justify-content: center;
+        }
+
+        .certification-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100px;
+            text-align: center;
+        }
+
+        .certification-icon span {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #007aff;
+        }
+
+        .certification-icon p {
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .security-highlight {
+            background-color: #e9f7fe;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .security-highlight-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            color: #007aff;
+        }
+
+        .security-feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .security-feature {
+            background-color: #f5f5f7;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .security-feature h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .security-feature p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        .security-tips {
+            background-color: #f0f7ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+
+        .security-tips h2 {
+            color: #0056b3;
+        }
+
+        .security-tips li {
+            margin-bottom: 12px;
+        }
+
+        .contact-security {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .contact-security h2 {
+            margin-bottom: 15px;
+        }
+
+        .contact-security .email {
+            color: #007aff;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .security-feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="#" class="back-button">
+                ← Back
+            </a>
+            <div class="title">Security</div>
+            <div style="width: 20px;"></div>
+        </header>
+
+        <div class="content">
+            <h1>FinTrack Security</h1>
+            
+            <div class="security-highlight">
+                <div class="security-highlight-icon">🔒</div>
+                <p>Your financial data security is our top priority. FinTrack uses bank-level encryption and multiple layers of protection to keep your information safe.</p>
+            </div>
+            
+            <p>At FinTrack, we understand that you're trusting us with sensitive financial information. We take this responsibility seriously and have implemented robust security measures to protect your data. Our security practices are comprehensive, continuously updated, and designed to meet or exceed industry standards.</p>
+            
+            <h2>How We Protect Your Data</h2>
+            
+            <div class="security-card">
+                <h3><span class="security-card-icon">🔐</span>Data Encryption</h3>
+                <p>We protect your data using 256-bit AES encryption—the same level of encryption used by banks and financial institutions. All information transmitted between your device and our servers is encrypted using TLS 1.3, ensuring that your data cannot be intercepted or read during transmission.</p>
+            </div>
+            
+            <div class="security-card">
+                <h3><span class="security-card-icon">🔍</span>Secure Authentication</h3>
+                <p>FinTrack supports multi-factor authentication (MFA) to provide an additional layer of security beyond your password. We recommend enabling MFA to significantly enhance the security of your account. We also support biometric authentication (fingerprint or face recognition) on compatible devices.</p>
+            </div>
+            
+            <div class="security-card">
+                <h3><span class="security-card-icon">🛡️</span>Financial Institution Connections</h3>
+                <p>When you connect your financial accounts, we use secure, read-only access. This means we can retrieve your transaction data but cannot move money or make changes to your accounts. We never store your banking credentials on our servers—we use secure tokens to maintain connections with your financial institutions.</p>
+            </div>
+            
+            <div class="security-feature-grid">
+                <div class="security-feature">
+                    <h3>Automatic Timeouts</h3>
+                    <p>Your session automatically times out after a period of inactivity to prevent unauthorized access.</p>
+                </div>
+                
+                <div class="security-feature">
+                    <h3>Regular Security Updates</h3>
+                    <p>We continuously update our security protocols to protect against new threats and vulnerabilities.</p>
+                </div>
+                
+                <div class="security-feature">
+                    <h3>Device Management</h3>
+                    <p>View and manage all devices that have accessed your account, with the ability to revoke access.</p>
+                </div>
+                
+                <div class="security-feature">
+                    <h3>24/7 Monitoring</h3>
+                    <p>Our systems are continuously monitored for suspicious activity and potential security threats.</p>
+                </div>
+            </div>
+            
+            <h2>Certifications & Compliance</h2>
+            <p>We maintain the highest security standards and regularly undergo independent security audits and assessments.</p>
+            
+            <div class="certification-icons">
+                <div class="certification-icon">
+                    <span>🔒</span>
+                    <p>SOC 2 Type II Certified</p>
+                </div>
+                <div class="certification-icon">
+                    <span>🛡️</span>
+                    <p>PCI DSS Compliant</p>
+                </div>
+                <div class="certification-icon">
+                    <span>📋</span>
+                    <p>GDPR Compliant</p>
+                </div>
+                <div class="certification-icon">
+                    <span>✓</span>
+                    <p>ISO 27001 Certified</p>
+                </div>
+            </div>
+            
+            <div class="security-card">
+                <h3><span class="security-card-icon">🔄</span>Data Backup & Disaster Recovery</h3>
+                <p>Your data is backed up regularly using redundant storage systems across geographically distributed data centers. Our comprehensive disaster recovery plan ensures that your information remains accessible even in the event of service disruptions.</p>
+            </div>
+            
+            <h2>Our Security Team</h2>
+            <p>Our dedicated security team consists of industry experts who continuously monitor our systems, implement security updates, and respond to potential threats. We conduct regular security training for all employees and maintain strict access controls to sensitive data.</p>
+            
+            <div class="security-tips">
+                <h2>Security Best Practices</h2>
+                <p>While we take extensive measures to protect your data, you can help keep your account secure by following these best practices:</p>
+                <ul>
+                    <li><strong>Use a strong, unique password</strong> for your FinTrack account that you don't use for other services.</li>
+                    <li><strong>Enable multi-factor authentication</strong> to add an extra layer of security.</li>
+                    <li><strong>Keep your device's operating system and apps updated</strong> to ensure you have the latest security patches.</li>
+                    <li><strong>Be alert for phishing attempts.</strong> FinTrack will never ask for your password via email or phone.</li>
+                    <li><strong>Review your account activity regularly</strong> and report any suspicious activity immediately.</li>
+                    <li><strong>Use secure networks</strong> when accessing financial information, and avoid using public Wi-Fi for sensitive transactions.</li>
+                </ul>
+            </div>
+            
+            <div class="contact-security">
+                <h2>Contact Our Security Team</h2>
+                <p>If you discover a potential security vulnerability or have security concerns, please contact our security team at:</p>
+                <p class="email">security@fintrackinc.com</p>
+            </div>
+            
+            <p>We continuously evaluate and enhance our security measures to stay ahead of emerging threats and maintain your trust. Your financial security is not just a feature—it's the foundation of our service.</p>
+        </div>
+        
+        <div class="footer">
+            <p>FinTrack, Inc. © 2025 All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

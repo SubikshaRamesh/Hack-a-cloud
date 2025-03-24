@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTrack - Notifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f7;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            color: #007aff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .settings-icon {
+            color: #007aff;
+            text-decoration: none;
+        }
+
+        .notification-list {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .notification {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .notification:last-child {
+            border-bottom: none;
+        }
+
+        .notification.unread {
+            background-color: #f0f7ff;
+        }
+
+        .notification.unread:before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 5px;
+            width: 8px;
+            height: 8px;
+            background-color: #007aff;
+            border-radius: 50%;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #e1f5fe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #0288d1;
+            font-size: 18px;
+        }
+
+        .notification-icon.alert {
+            background-color: #ffebee;
+            color: #e53935;
+        }
+
+        .notification-icon.success {
+            background-color: #e8f5e9;
+            color: #43a047;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .notification-action {
+            color: #007aff;
+            font-size: 14px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .filter-section {
+            margin-bottom: 15px;
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 5px 0;
+        }
+
+        .filter-button {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            white-space: nowrap;
+            color: #666;
+        }
+
+        .filter-button.active {
+            background: #007aff;
+            color: white;
+            border-color: #007aff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .clear-all {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .clear-button {
+            color: #007aff;
+            background: none;
+            border: none;
+            font-size: 14px;
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="#" class="back-button">
+                ← Back
+            </a>
+            <div class="title">Notifications</div>
+            <a href="#" class="settings-icon">⚙️</a>
+        </header>
+
+        <div class="filter-section">
+            <button class="filter-button active">All</button>
+            <button class="filter-button">Alerts</button>
+            <button class="filter-button">Updates</button>
+            <button class="filter-button">Bills</button>
+            <button class="filter-button">Insights</button>
+        </div>
+
+        <div class="notification-list">
+            <div class="notification unread">
+                <div class="notification-icon alert">!</div>
+                <div class="notification-content">
+                    <div class="notification-title">Unusual spending detected</div>
+                    <div class="notification-message">We noticed a large transaction of $435.50 at Amazon. This is higher than your usual spending.</div>
+                    <div class="notification-time">5 minutes ago</div>
+                    <a href="#" class="notification-action">Review transaction</a>
+                </div>
+            </div>
+
+            <div class="notification unread">
+                <div class="notification-icon">$</div>
+                <div class="notification-content">
+                    <div class="notification-title">Bill reminder</div>
+                    <div class="notification-message">Your credit card payment of $2,140 is due in 3 days.</div>
+                    <div class="notification-time">2 hours ago</div>
+                    <a href="#" class="notification-action">Pay now</a>
+                </div>
+            </div>
+
+            <div class="notification">
+                <div class="notification-icon success">✓</div>
+                <div class="notification-content">
+                    <div class="notification-title">Savings goal achieved</div>
+                    <div class="notification-message">Congratulations! You've reached your "Vacation Fund" savings goal of $1,500.</div>
+                    <div class="notification-time">Yesterday</div>
+                    <a href="#" class="notification-action">View savings</a>
+                </div>
+            </div>
+
+            <div class="notification">
+                <div class="notification-icon">📊</div>
+                <div class="notification-content">
+                    <div class="notification-title">Monthly expense report</div>
+                    <div class="notification-message">Your February expense report is now available. You spent 12% less than January!</div>
+                    <div class="notification-time">Mar 1, 2025</div>
+                    <a href="#" class="notification-action">View report</a>
+                </div>
+            </div>
+
+            <div class="notification">
+                <div class="notification-icon">💡</div>
+                <div class="notification-content">
+                    <div class="notification-title">Money-saving tip</div>
+                    <div class="notification-message">Based on your spending, you could save $75/month by adjusting your subscription services.</div>
+                    <div class="notification-time">Feb 28, 2025</div>
+                    <a href="#" class="notification-action">See details</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="clear-all">
+            <button class="clear-button">Mark all as read</button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Recommendations - FinTrack</title>
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-light: #e0e7ff;
+            --success-color: #10b981;
+            --success-light: #d1fae5;
+            --warning-color: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger-color: #ef4444;
+            --danger-light: #fee2e2;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --bg-light: #f9fafb;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #4338ca;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+            margin: 1rem 0;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-green {
+            background-color: var(--success-color);
+        }
+        
+        .progress-yellow {
+            background-color: var(--warning-color);
+        }
+        
+        .progress-red {
+            background-color: var(--danger-color);
+        }
+        
+        .recommendation {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: var(--bg-light);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tip-card {
+            background-color: var(--primary-light);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .tip-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .tip-icon {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        
+        .badge-primary {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .chart-toggle {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-toggle {
+            padding: 4px 8px;
+            border: 1px solid var(--primary-color);
+            background: none;
+            color: var(--primary-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-toggle.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-buttons {
+            width: 100%;
+                justify-content: space-between;
+            }
+            
+            .btn {
+                flex: 1;
+                text-align: center;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        .budget-plan-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .budget-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background-color: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .summary-item .label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .summary-item .value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .budget-categories {
+            background-color: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .budget-categories h3 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .category-item {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .category-amount {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .category-progress {
+            height: 6px;
+            background-color: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .category-progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .budget-recommendations {
+            background-color: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .budget-recommendations h3 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .recommendations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .recommendation-item {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommendation-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .recommendation-icon {
+            font-size: 1.25rem;
+        }
+
+        .recommendation-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .recommendation-description {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .recommendation-amount {
+            margin-top: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .budget-planning-container {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .planning-description {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .generate-budget-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .generate-budget-btn:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        .btn-icon {
+            font-size: 1.25rem;
+        }
+
+        .budget-plan-card {
+            position: relative;
+            margin-top: 2rem;
+        }
+
+        .btn-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .btn-close:hover {
+            color: var(--text-dark);
+        }
+
+        /* Add animation for showing/hiding the budget plan */
+        .budget-plan-card {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">FinTrack</div>
+            <div class="nav-buttons">
+        <a href="dashboard.html" class="btn">Dashboard</a>
+                <a href="budgetsetup.html" class="btn">Budget Setup</a>
+                <a href="#" class="btn">Recommendations</a>
+            </div>
+        </header>
+        
+        <div class="dashboard-grid">
+            <!-- Monthly Income Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Monthly Income</h2>
+                </div>
+                <div class="card-content">
+                    <p class="text-2xl font-bold">₹5,000</p>
+                </div>
+            </div>
+            
+            <!-- Total Expenses Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Total Expenses</h2>
+                </div>
+                <div class="card-content">
+                    <p class="text-2xl font-bold">₹4,500</p>
+                    <div class="progress-container">
+                        <div class="progress-bar progress-yellow" style="width: 90%"></div>
+                    </div>
+                    <p class="text-sm text-gray-500">Moderate</p>
+                </div>
+            </div>
+            
+            <!-- Remaining Budget Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Remaining Budget</h2>
+                </div>
+                <div class="card-content">
+                    <p class="text-2xl font-bold text-green-600">₹500</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-grid">
+            <!-- Budget Analysis Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Budget Analysis</h2>
+                    <div class="chart-toggle">
+                        <button class="btn-toggle active" data-chart="budgetAnalysis" data-type="bar">Bar</button>
+                        <button class="btn-toggle" data-chart="budgetAnalysis" data-type="pie">Pie</button>
+                </div>
+                </div>
+                    <div class="chart-container">
+                        <canvas id="budgetAnalysisChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Expense Categories Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Expense Categories</h2>
+                    <div class="chart-toggle">
+                        <button class="btn-toggle active" data-chart="expenseCategories" data-type="bar">Bar</button>
+                        <button class="btn-toggle" data-chart="expenseCategories" data-type="pie">Pie</button>
+                </div>
+                </div>
+                    <div class="chart-container">
+                        <canvas id="expenseCategoriesChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Personalized Budget Tips Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Personalized Budget Tips</h2>
+            </div>
+                <div class="tabs">
+                    <div class="tab active" data-tab="general">General</div>
+                    <div class="tab" data-tab="housing">Housing</div>
+                    <div class="tab" data-tab="food">Food</div>
+                    <div class="tab" data-tab="transportation">Transportation</div>
+                    <div class="tab" data-tab="savings">Savings</div>
+                </div>
+                
+                <!-- General Tips -->
+                <div class="tab-content active" id="general-tips">
+                    <div class="tip-card">
+                        <div class="tip-title">
+                            <span class="tip-icon">💡</span>
+                            50/30/20 Rule
+                        </div>
+                        <p>Try to allocate 50% of your income to needs, 30% to wants, and 20% to savings. You're currently spending 60% on needs, 30% on wants, and only 10% on savings.</p>
+                    </div>
+                    
+                    <div class="tip-card">
+                        <div class="tip-title">
+                            <span class="tip-icon">📊</span>
+                            Track Your Spending
+                        </div>
+                    <p>Based on your patterns, you could save about ₹200 more per month by identifying non-essential purchases. Consider using FinTrack's expense tracker to categorize all transactions.</p>
+                    </div>
+                </div>
+                
+                <!-- Housing Tips -->
+                <div class="tab-content" id="housing-tips">
+                    <div class="tip-card">
+                        <div class="tip-title">
+                            <span class="tip-icon">🏠</span>
+                            Housing Costs <span class="badge badge-primary">High Priority</span>
+                        </div>
+                    <p>Your housing expenses are 35% of your income (₹1,500), exceeding the recommended 30%. Consider these options:</p>
+                        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                            <li>Refinance your mortgage if interest rates have dropped</li>
+                            <li>Look into a roommate situation to share costs</li>
+                            <li>Check if you qualify for any property tax reductions</li>
+                            <li>Evaluate if downsizing would benefit your financial goals</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Food Tips -->
+                <div class="tab-content" id="food-tips">
+                    <div class="tip-card">
+                        <div class="tip-title">
+                            <span class="tip-icon">🍽️</span>
+                            Meal Planning
+                        </div>
+                    <p>Your food expenses (₹600/month) could be reduced with better planning. The average person wastes about 30% of their food budget.</p>
+                        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                            <li>Plan meals weekly and create a shopping list</li>
+                            <li>Buy staples in bulk when on sale</li>
+                            <li>Cook large batches and freeze portions</li>
+                            <li>Use apps to find grocery deals and coupons</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Transportation Tips -->
+                <div class="tab-content" id="transportation-tips">
+                    <div class="tip-card">
+                        <div class="tip-title">
+                            <span class="tip-icon">🚗</span>
+                            Vehicle Expenses
+                        </div>
+                    <p>Your transportation costs (₹400/month) include car payments, insurance, gas, and maintenance. Potential savings:</p>
+                        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Shop around for better auto insurance rates (estimated savings: ₹30-50/month)</li>
+                            <li>Consider carpooling to reduce gas expenses</li>
+                            <li>Perform regular maintenance to prevent costly repairs</li>
+                            <li>Use apps to find the lowest gas prices in your area</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Savings Tips -->
+                <div class="tab-content" id="savings-tips">
+                    <div class="tip-card">
+                        <div class="tip-title">
+                            <span class="tip-icon">💼</span>
+                            Retirement Savings <span class="badge badge-primary">High Priority</span>
+                        </div>
+                        <p>You're currently saving about 10% of your income, below the recommended 15-20% for retirement. Consider:</p>
+                        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Increase your 401(k) contribution by 2% (an additional ₹100/month)</li>
+                            <li>Take full advantage of employer matching if available</li>
+                            <li>Open a Roth IRA for tax-advantaged growth</li>
+                            <li>Set up automatic increases of 1% annually to your retirement savings</li>
+                        </ul>
+                    </div>
+                        </div>
+                    </div>
+                    
+        <!-- Financial Goals Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Financial Goals Progress</h2>
+                        </div>
+            <div class="space-y-6" id="goalsContainer">
+                <!-- Goals will be dynamically populated -->
+                    </div>
+            <button class="btn add-goal-btn" style="margin-top: 1.5rem; width: 100%;">Add New Goal</button>
+        </div>
+        
+        <!-- Generate Budget Button -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Budget Planning</h2>
+            </div>
+            <div class="budget-planning-container">
+                <p class="planning-description">Get a personalized budget plan based on your spending patterns and financial goals.</p>
+                <a href="recommendedbudget.html" class="btn generate-budget-btn">
+                    <span class="btn-icon">📊</span>
+                    Generate Budget Plan
+                </a>
+            </div>
+        </div>
+        
+        <!-- Personalized Budget Plan Card -->
+        <div class="card budget-plan-card" id="budgetPlanCard" style="display: none;">
+            <div class="card-header">
+                <h2 class="card-title">Personalized Budget Plan</h2>
+                <button class="btn-close" id="closeBudgetPlan">×</button>
+            </div>
+            <div class="budget-plan-container">
+                <div class="budget-summary">
+                    <div class="summary-item">
+                        <span class="label">Monthly Income</span>
+                        <span class="value" id="monthlyIncomeValue">₹0</span>
+                        </div>
+                    <div class="summary-item">
+                        <span class="label">Total Expenses</span>
+                        <span class="value" id="totalExpensesValue">₹0</span>
+                        </div>
+                    <div class="summary-item">
+                        <span class="label">Remaining Budget</span>
+                        <span class="value" id="remainingBudgetValue">₹0</span>
+                        </div>
+                    </div>
+                    
+                <div class="budget-categories">
+                    <h3>Recommended Budget Allocation</h3>
+                    <div class="category-grid" id="budgetCategories">
+                        <!-- Categories will be dynamically populated -->
+                        </div>
+                    </div>
+                    
+                <div class="budget-recommendations">
+                    <h3>Smart Recommendations</h3>
+                    <div class="recommendations-list" id="smartRecommendations">
+                        <!-- Recommendations will be dynamically populated -->
+                        </div>
+                        </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch user's bank account data
+        async function fetchUserBankData() {
+            try {
+                // Replace this with your actual API endpoint
+                const response = await fetch('/api/user/bank-data');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch bank data');
+                }
+                const data = await response.json();
+                
+                // Add goals from localStorage
+                const savedGoals = JSON.parse(localStorage.getItem('financialGoals') || '[]');
+                data.goals = savedGoals;
+                
+                return data;
+            } catch (error) {
+                console.error('Error fetching bank data:', error);
+                // Return default data if fetch fails
+                return {
+                    monthlyIncome: 5000,
+                    expenses: {
+                        housing: 1500,
+                        transportation: 400,
+                        food: 600,
+                        utilities: 300,
+                        entertainment: 400,
+                        shopping: 350,
+                        healthcare: 200,
+                        savings: 500,
+                        other: 250
+                    },
+                    goals: JSON.parse(localStorage.getItem('financialGoals') || '[]')
+                };
+            }
+        }
+
+        // Function to generate budget recommendations
+        function generateBudgetRecommendations(userData) {
+            const recommendations = [];
+            const monthlyIncome = userData.monthlyIncome;
+            const expenses = userData.expenses;
+            
+            // Calculate total expenses
+            const totalExpenses = Object.values(expenses).reduce((a, b) => a + b, 0);
+            
+            // Analyze housing expenses
+            if (expenses.housing > monthlyIncome * 0.3) {
+                recommendations.push({
+                    icon: '🏠',
+                    title: 'Housing Cost Optimization',
+                    description: 'Your housing expenses exceed 30% of your income. Consider refinancing or finding a more affordable housing option.',
+                    amount: `Potential savings: ₹${(expenses.housing - monthlyIncome * 0.3).toLocaleString()}`
+                });
+            }
+            
+            // Analyze food expenses
+            if (expenses.food > monthlyIncome * 0.15) {
+                recommendations.push({
+                    icon: '🍽️',
+                    title: 'Food Budget Optimization',
+                    description: 'Your food expenses are above the recommended 15% of income. Try meal planning and bulk shopping.',
+                    amount: `Potential savings: ₹${(expenses.food - monthlyIncome * 0.15).toLocaleString()}`
+                });
+            }
+            
+            // Analyze savings
+            if (expenses.savings < monthlyIncome * 0.2) {
+                recommendations.push({
+                    icon: '💰',
+                    title: 'Increase Savings',
+                    description: 'Your savings are below the recommended 20% of income. Consider setting up automatic transfers.',
+                    amount: `Recommended increase: ₹${(monthlyIncome * 0.2 - expenses.savings).toLocaleString()}`
+                });
+            }
+            
+            return recommendations;
+        }
+
+        // Function to update budget plan
+        function updateBudgetPlan(userData) {
+            // Update summary values
+            document.getElementById('monthlyIncomeValue').textContent = `₹${userData.monthlyIncome.toLocaleString()}`;
+            const totalExpenses = Object.values(userData.expenses).reduce((a, b) => a + b, 0);
+            document.getElementById('totalExpensesValue').textContent = `₹${totalExpenses.toLocaleString()}`;
+            document.getElementById('remainingBudgetValue').textContent = `₹${(userData.monthlyIncome - totalExpenses).toLocaleString()}`;
+            
+            // Update budget categories
+            const categoriesContainer = document.getElementById('budgetCategories');
+            categoriesContainer.innerHTML = Object.entries(userData.expenses).map(([category, amount]) => {
+                const percentage = (amount / userData.monthlyIncome) * 100;
+                const recommendedPercentage = getRecommendedPercentage(category);
+                const progressColor = percentage > recommendedPercentage ? 'var(--danger-color)' : 'var(--success-color)';
+                
+                return `
+                    <div class="category-item">
+                        <div class="category-header">
+                            <span class="category-name">${category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                            <span class="category-amount">₹${amount.toLocaleString()}</span>
+                        </div>
+                        <div class="category-progress">
+                            <div class="category-progress-bar" style="width: ${percentage}%; background-color: ${progressColor}"></div>
+                        </div>
+                        <div class="category-details">
+                            <span class="text-sm text-gray-500">${percentage.toFixed(1)}% of income</span>
+                            <span class="text-sm text-gray-500">Recommended: ${recommendedPercentage}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Update recommendations
+            const recommendations = generateBudgetRecommendations(userData);
+            const recommendationsContainer = document.getElementById('smartRecommendations');
+            recommendationsContainer.innerHTML = recommendations.map(rec => `
+                <div class="recommendation-item">
+                    <div class="recommendation-header">
+                        <span class="recommendation-icon">${rec.icon}</span>
+                        <span class="recommendation-title">${rec.title}</span>
+                    </div>
+                    <p class="recommendation-description">${rec.description}</p>
+                    <p class="recommendation-amount">${rec.amount}</p>
+                </div>
+            `).join('');
+        }
+
+        // Helper function to get recommended percentage for each category
+        function getRecommendedPercentage(category) {
+            const recommendations = {
+                housing: 30,
+                transportation: 10,
+                food: 15,
+                utilities: 10,
+                entertainment: 10,
+                shopping: 5,
+                healthcare: 5,
+                savings: 20,
+                other: 5
+            };
+            return recommendations[category] || 5;
+        }
+
+        // Function to update dashboard with new data
+        async function updateDashboard() {
+            const userData = await fetchUserBankData();
+            
+            // Update summary cards
+            document.querySelector('.text-2xl.font-bold').textContent = `₹${userData.monthlyIncome.toLocaleString()}`;
+            document.querySelectorAll('.text-2xl.font-bold')[1].textContent = `₹${Object.values(userData.expenses).reduce((a, b) => a + b, 0).toLocaleString()}`;
+            document.querySelector('.text-2xl.font-bold.text-green-600').textContent = `₹${(userData.monthlyIncome - Object.values(userData.expenses).reduce((a, b) => a + b, 0)).toLocaleString()}`;
+
+            // Update Budget Analysis Chart
+            const needs = userData.expenses.housing + userData.expenses.utilities + userData.expenses.food;
+            const wants = userData.expenses.entertainment + userData.expenses.shopping;
+        const savings = userData.expenses.savings;
+
+            const needsPercentage = (needs / userData.monthlyIncome) * 100;
+            const wantsPercentage = (wants / userData.monthlyIncome) * 100;
+            const savingsPercentage = (savings / userData.monthlyIncome) * 100;
+
+            budgetAnalysisChart.data.datasets[0].data = [needsPercentage, wantsPercentage, savingsPercentage];
+            budgetAnalysisChart.update();
+
+            // Update Expense Categories Chart
+            expenseCategoriesChart.data.labels = Object.keys(userData.expenses).map(key => key.charAt(0).toUpperCase() + key.slice(1));
+            expenseCategoriesChart.data.datasets[0].data = Object.values(userData.expenses);
+            expenseCategoriesChart.update();
+
+            // Update Financial Goals
+            const goalsContainer = document.querySelector('.space-y-6');
+            goalsContainer.innerHTML = userData.goals.map(goal => {
+                const percentage = (goal.current / goal.target) * 100;
+                return `
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-medium">${goal.name}</span>
+                            <span class="text-sm text-gray-500">₹${goal.current.toLocaleString()} of ₹${goal.target.toLocaleString()}</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar progress-green" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="flex justify-between mt-1">
+                            <span class="text-xs text-gray-500">${Math.round(percentage)}% Complete</span>
+                            <span class="text-xs text-gray-500">₹${(goal.target - goal.current).toLocaleString()} remaining</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Update budget plan
+            updateBudgetPlan(userData);
+        }
+
+        // Initialize charts with empty data
+        const budgetAnalysisCtx = document.getElementById('budgetAnalysisChart').getContext('2d');
+        const budgetAnalysisChart = new Chart(budgetAnalysisCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Needs', 'Wants', 'Savings'],
+                datasets: [
+                    {
+                        label: 'Current Allocation',
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(79, 70, 229, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(79, 70, 229, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        barThickness: 40
+                    },
+                    {
+                        label: 'Recommended Allocation',
+                        data: [50, 30, 20],
+                        backgroundColor: [
+                            'rgba(79, 70, 229, 0.4)',
+                            'rgba(16, 185, 129, 0.4)',
+                            'rgba(245, 158, 11, 0.4)'
+                        ],
+                        borderColor: [
+                            'rgba(79, 70, 229, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        barThickness: 40
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Percentage of Income (%)',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Current vs. Recommended Budget Allocation',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            bottom: 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#1f2937',
+                        bodyColor: '#4f46e5',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const expenseCategoriesCtx = document.getElementById('expenseCategoriesChart').getContext('2d');
+        const expenseCategoriesChart = new Chart(expenseCategoriesCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Current Expenses',
+                        data: [],
+                        backgroundColor: [
+                            'rgba(79, 70, 229, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(99, 102, 241, 0.8)',
+                            'rgba(236, 72, 153, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(168, 85, 247, 0.8)',
+                            'rgba(59, 130, 246, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(79, 70, 229, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(99, 102, 241, 1)',
+                            'rgba(236, 72, 153, 1)',
+                            'rgba(34, 197, 94, 1)',
+                            'rgba(168, 85, 247, 1)',
+                            'rgba(59, 130, 246, 1)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        barThickness: 40
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Amount (₹)',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Expense Breakdown by Category',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            bottom: 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#1f2937',
+                        bodyColor: '#4f46e5',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return `₹${context.parsed.y.toLocaleString()}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Initial update
+        updateDashboard();
+
+        // Update every 5 minutes
+        setInterval(updateDashboard, 5 * 60 * 1000);
+        
+        // Tab functionality
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Hide all tab content
+                const tabContents = document.querySelectorAll('.tab-content');
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Show the selected tab content
+                const tabName = tab.getAttribute('data-tab');
+                document.getElementById(`${tabName}-tips`).classList.add('active');
+            });
+        });
+
+        // Add New Goal functionality
+        document.querySelector('.add-goal-btn').addEventListener('click', function() {
+            // Create modal for adding new goal
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            `;
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+            modalContent.style.cssText = `
+                background-color: white;
+                padding: 2rem;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 500px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            `;
+
+            modalContent.innerHTML = `
+                <h2 style="margin-bottom: 1rem; color: var(--text-dark);">Add New Goal</h2>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--text-dark);">Goal Name</label>
+                    <input type="text" id="goalName" class="form-input" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--text-dark);">Target Amount</label>
+                    <input type="number" id="goalTarget" class="form-input" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--text-dark);">Current Amount</label>
+                    <input type="number" id="goalCurrent" class="form-input" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 4px;">
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="closeModal(this)">Cancel</button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="addNewGoal(this)">Save</button>
+                </div>
+            `;
+
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+        });
+
+        function closeModal(button) {
+            const modal = button.closest('.modal');
+            modal.remove();
+        }
+
+        async function addNewGoal(button) {
+            const modal = button.closest('.modal');
+            const name = document.getElementById('goalName').value;
+            const target = parseFloat(document.getElementById('goalTarget').value);
+            const current = parseFloat(document.getElementById('goalCurrent').value);
+            
+            if (!name || isNaN(target) || isNaN(current)) {
+                alert('Please fill in all fields with valid values');
+                return;
+            }
+            
+            try {
+                // For now, we'll store the goal in localStorage since we don't have a backend
+                const existingGoals = JSON.parse(localStorage.getItem('financialGoals') || '[]');
+                const newGoal = {
+                    id: Date.now(), // Use timestamp as a simple unique ID
+                    name,
+                    target_amount: target,
+                    current_amount: current
+                };
+                
+                existingGoals.push(newGoal);
+                localStorage.setItem('financialGoals', JSON.stringify(existingGoals));
+                
+                // Add new goal to the list
+                const goalsContainer = document.getElementById('goalsContainer');
+                const percentage = (current / target) * 100;
+
+                const goalElement = document.createElement('div');
+                goalElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-medium">${name}</span>
+                        <span class="text-sm text-gray-500">₹${current.toLocaleString()} of ₹${target.toLocaleString()}</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar progress-green" style="width: ${percentage}%"></div>
+                    </div>
+                    <div class="flex justify-between mt-1">
+                        <span class="text-xs text-gray-500">${Math.round(percentage)}% Complete</span>
+                        <span class="text-xs text-gray-500">₹${(target - current).toLocaleString()} remaining</span>
+                    </div>
+                `;
+
+                goalsContainer.appendChild(goalElement);
+                modal.remove();
+                
+                // Show success message
+                alert('Goal added successfully!');
+            } catch (error) {
+                console.error('Error saving goal:', error);
+                alert('Failed to save goal. Please try again.');
+            }
+        }
+
+        // Chart type toggle functionality
+        document.querySelectorAll('.btn-toggle').forEach(button => {
+            button.addEventListener('click', function() {
+                const chartId = this.getAttribute('data-chart');
+                const newType = this.getAttribute('data-type');
+                const chart = chartId === 'budgetAnalysis' ? budgetAnalysisChart : expenseCategoriesChart;
+                
+                // Update active state of buttons
+                this.parentElement.querySelectorAll('.btn-toggle').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Update chart type
+                chart.config.type = newType;
+                
+                // Update options based on chart type
+                if (newType === 'pie') {
+                    chart.options.scales = undefined;
+                    chart.options.plugins.tooltip.callbacks.label = function(context) {
+                        const value = context.parsed;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return `${context.label}: ${chartId === 'budgetAnalysis' ? value + '%' : '₹' + value.toLocaleString()} (${percentage}%)`;
+                    };
+                } else {
+                    chart.options.scales = {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: chartId === 'budgetAnalysis' ? 'Percentage of Income (%)' : 'Amount (₹)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    };
+                }
+                
+                chart.update();
+            });
+        });
+
+        // Add these event listeners after your existing code
+        document.getElementById('generateBudgetBtn').addEventListener('click', async function() {
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<span class="btn-icon">⏳</span> Generating Budget Plan...';
+            
+            try {
+                // Fetch latest data
+                const userData = await fetchUserBankData();
+                
+                // Update the budget plan
+                updateBudgetPlan(userData);
+                
+                // Show the budget plan card
+                document.getElementById('budgetPlanCard').style.display = 'block';
+                
+                // Scroll to the budget plan
+                document.getElementById('budgetPlanCard').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error generating budget plan:', error);
+                alert('Failed to generate budget plan. Please try again.');
+            } finally {
+                // Reset button state
+                this.disabled = false;
+                this.innerHTML = '<span class="btn-icon">📊</span> Generate Budget Plan';
+            }
+        });
+
+        document.getElementById('closeBudgetPlan').addEventListener('click', function() {
+            document.getElementById('budgetPlanCard').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

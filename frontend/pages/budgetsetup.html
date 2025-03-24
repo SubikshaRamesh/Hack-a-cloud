@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Setup - FinTrack</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-light: #e0e7ff;
+            --success-color: #10b981;
+            --success-light: #d1fae5;
+            --warning-color: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger-color: #ef4444;
+            --danger-light: #fee2e2;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+            --bg-light: #f9fafb;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #4338ca;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+            margin: 1rem 0;
+        }
+        
+        .budget-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+        
+        .form-group input {
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+        
+        .category-slider {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .slider-value {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            background-color: #4338ca;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+        }
+        
+        .slider::-moz-range-thumb:hover {
+            background-color: #4338ca;
+        }
+        
+        .recommended-range {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+        
+        .total-budget {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: var(--primary-light);
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+        
+        .total-budget span {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .warning {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .success {
+            color: var(--success-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .btn {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">FinTrack</div>
+            <div class="nav-buttons">
+                <a href="dashboard.html" class="btn">Dashboard</a>
+                <a href="budgetsetup.html" class="btn">Budget Setup</a>
+                <a href="budgetrecomendation.html" class="btn">Recommendations</a>
+            </div>
+        </header>
+        
+        <div class="dashboard-grid">
+            <!-- Budget Setup Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Monthly Budget Setup</h2>
+                </div>
+                <form class="budget-form" id="budgetForm">
+                    <div class="form-group">
+                        <label for="monthlyIncome">Monthly Income (₹)</label>
+                        <input type="number" id="monthlyIncome" min="0" step="100" required>
+                    </div>
+                    
+                    <div class="category-slider">
+                        <div class="slider-header">
+                            <label for="needs">Needs (Housing, Food, Utilities)</label>
+                            <span class="slider-value" id="needsValue">50%</span>
+                        </div>
+                        <input type="range" id="needs" class="slider" min="0" max="100" value="50">
+                        <span class="recommended-range">Recommended: 50-60%</span>
+                    </div>
+                    
+                    <div class="category-slider">
+                        <div class="slider-header">
+                            <label for="wants">Wants (Entertainment, Shopping)</label>
+                            <span class="slider-value" id="wantsValue">30%</span>
+                        </div>
+                        <input type="range" id="wants" class="slider" min="0" max="100" value="30">
+                        <span class="recommended-range">Recommended: 30-40%</span>
+                    </div>
+                    
+                    <div class="category-slider">
+                        <div class="slider-header">
+                            <label for="savings">Savings & Investments</label>
+                            <span class="slider-value" id="savingsValue">20%</span>
+                        </div>
+                        <input type="range" id="savings" class="slider" min="0" max="100" value="20">
+                        <span class="recommended-range">Recommended: 20-30%</span>
+                    </div>
+                    
+                    <div class="total-budget">
+                        <span>Total Allocated:</span>
+                        <span id="totalAllocated">100%</span>
+                    </div>
+                    
+                    <button type="submit" class="btn">Save Budget</button>
+                </form>
+            </div>
+            
+            <!-- Budget Preview Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Budget Preview</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="budgetPreviewChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize the budget preview chart
+        const ctx = document.getElementById('budgetPreviewChart').getContext('2d');
+        const budgetPreviewChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Needs', 'Wants', 'Savings'],
+                datasets: [{
+                    data: [50, 30, 20],
+                    backgroundColor: [
+                        'rgba(79, 70, 229, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(79, 70, 229, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(245, 158, 11, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed;
+                                return `${context.label}: ${value}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Handle slider changes
+        const sliders = document.querySelectorAll('.slider');
+        const totalAllocated = document.getElementById('totalAllocated');
+        
+        sliders.forEach(slider => {
+            slider.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                const valueDisplay = document.getElementById(`${this.id}Value`);
+                valueDisplay.textContent = `${value}%`;
+                
+                // Calculate total allocation
+                const total = Array.from(sliders).reduce((sum, slider) => sum + parseInt(slider.value), 0);
+                totalAllocated.textContent = `${total}%`;
+                
+                // Update chart
+                budgetPreviewChart.data.datasets[0].data = Array.from(sliders).map(slider => parseInt(slider.value));
+                budgetPreviewChart.update();
+                
+                // Show warning if total is not 100%
+                if (total !== 100) {
+                    totalAllocated.style.color = 'var(--danger-color)';
+                    totalAllocated.parentElement.classList.add('warning');
+                } else {
+                    totalAllocated.style.color = 'var(--success-color)';
+                    totalAllocated.parentElement.classList.remove('warning');
+                }
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('budgetForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const monthlyIncome = document.getElementById('monthlyIncome').value;
+            const needs = document.getElementById('needs').value;
+            const wants = document.getElementById('wants').value;
+            const savings = document.getElementById('savings').value;
+            
+            // Calculate actual amounts
+            const needsAmount = (monthlyIncome * needs) / 100;
+            const wantsAmount = (monthlyIncome * wants) / 100;
+            const savingsAmount = (monthlyIncome * savings) / 100;
+            
+            // Save budget data (you would typically send this to your backend)
+            const budgetData = {
+                monthlyIncome: parseFloat(monthlyIncome),
+                allocations: {
+                    needs: parseFloat(needs),
+                    wants: parseFloat(wants),
+                    savings: parseFloat(savings)
+                },
+                amounts: {
+                    needs: needsAmount,
+                    wants: wantsAmount,
+                    savings: savingsAmount
+                }
+            };
+            
+            // Show success message
+            alert('Budget saved successfully!');
+            
+            // You would typically send this data to your backend
+            console.log('Budget data:', budgetData);
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank Integration - FinTrack</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/bank-integration.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- Add Plaid Link script -->
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --secondary: #64748b;
+      --background: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar {
+      background-color: var(--card);
+      padding: 1rem 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-weight: bold;
+      font-size: 1.5rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      width: 100%;
+      box-sizing: border-box;
+      flex: 1;
+    }
+
+    .card {
+      background-color: var(--card);
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary);
+    }
+
+    .btn-success {
+      background-color: var(--success);
+    }
+
+    .steps {
+      display: flex;
+      margin: 2rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .step {
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .step.active {
+      color: var(--primary);
+    }
+
+    .step.completed {
+      color: var(--success);
+    }
+
+    .step.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: currentColor;
+    }
+
+    .tab-content {
+      display: none;
+      margin-top: 2rem;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .bank-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .bank-card {
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .bank-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .bank-logo {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 0.5rem;
+    }
+
+    .bank-name {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      box-sizing: border-box;
+      margin-top: 0.25rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .auth-form {
+      max-width: 500px;
+      margin: 2rem auto;
+    }
+
+    .bank-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .bank-header h2 {
+      margin: 0 0 0 1rem;
+    }
+
+    .secure-badge {
+      display: inline-flex;
+      align-items: center;
+      background-color: #f0fdf4;
+      color: var(--success);
+      padding: 0.5rem 1rem;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .secure-badge svg {
+      margin-right: 0.5rem;
+    }
+
+    .step-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+    }
+
+    .account-list {
+      margin: 2rem 0;
+    }
+
+    .account-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .account-icon {
+      font-size: 1.5rem;
+      margin-right: 1rem;
+    }
+
+    .account-details {
+      flex: 1;
+    }
+
+    .account-name {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .account-number {
+      margin: 0.25rem 0 0;
+      color: var(--text-secondary);
+    }
+
+    .account-balance {
+      font-weight: 600;
+      margin-right: 1.5rem;
+    }
+
+    .loader-container {
+      text-align: center;
+      padding: 3rem 0;
+    }
+
+    .loader {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top: 4px solid var(--primary);
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 2rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .recent-activity {
+      margin: 1rem 0;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .activity-icon {
+      font-size: 1.25rem;
+      margin-right: 1rem;
+    }
+
+    .activity-title {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .activity-time {
+      margin: 0.25rem 0 0;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="logo">
+      <span class="logo-icon"></span> FinTrack
+    </div>
+    <div>
+        <a href="dashboard.html" class="btn">Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="card">
+      <div class="secure-badge">
+        <i class="fas fa-shield-alt"></i> Secure Connection
+      </div>
+      
+      <h1>Connect Your Bank Account</h1>
+      <p>Securely link your bank account to track your transactions and manage your finances.</p>
+      
+      <div class="steps">
+        <div class="step active">
+          <div class="step-number">1</div>
+          <div class="step-text">Select Bank</div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-text">Authenticate</div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-text">Complete</div>
+        </div>
+      </div>
+
+      <div id="connection-status"></div>
+      
+      <div class="bank-grid">
+        <div class="bank-card" data-bank="chase">
+          <img src="../assets/bank-logos/chase.svg" alt="Chase">
+          <h3>Chase</h3>
+        </div>
+        <div class="bank-card" data-bank="bank-of-america">
+          <img src="../assets/bank-logos/bank-of-america.svg" alt="Bank of America">
+          <h3>Bank of America</h3>
+        </div>
+        <div class="bank-card" data-bank="wells-fargo">
+          <img src="../assets/bank-logos/wells-fargo.svg" alt="Wells Fargo">
+          <h3>Wells Fargo</h3>
+        </div>
+        <div class="bank-card" data-bank="citi">
+          <img src="../assets/bank-logos/citi.svg" alt="Citi">
+          <h3>Citi</h3>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <button id="test-connection" class="btn btn-secondary">
+          <i class="fas fa-vial"></i> Test Connection
+        </button>
+        <div id="test-credentials"></div>
+      </div>
+
+      <div class="button-group">
+        <button onclick="window.location.href='dashboard.html'" class="btn btn-secondary">
+          <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/bank-integration.js"></script>
+  <script>
+    // Check if user is logged in
+<<<<<<< HEAD
+<<<<<<< HEAD
+    const accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+      window.location.href = 'login.html';
+    }
+
+    // Initialize Plaid Link
+    const handler = Plaid.create({
+      token: null,
+      language: 'en',
+      countryCodes: ['US'],
+      env: 'sandbox',
+      product: ['transactions'],
+      onSuccess: async (public_token, metadata) => {
+        try {
+          // Exchange public token for access token
+          const response = await fetch('http://localhost:5000/api/plaid/exchange-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              public_token: public_token,
+              institution_id: metadata.institution.institution_id,
+              accounts: metadata.accounts
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            // Update UI to show success
+            document.querySelector('.step:nth-child(2)').classList.add('completed');
+            document.querySelector('.step:nth-child(3)').classList.add('active');
+            
+            // Show success message
+            document.getElementById('connection-status').innerHTML = `
+              <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> Bank account connected successfully!
+              </div>
+            `;
+            
+            // Redirect to dashboard after 2 seconds
+            setTimeout(() => {
+              window.location.href = 'dashboard.html';
+            }, 2000);
+          } else {
+            throw new Error(data.message || 'Failed to connect bank account');
+          }
+        } catch (error) {
+          document.getElementById('connection-status').innerHTML = `
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-circle"></i> ${error.message}
+            </div>
+          `;
+        }
+      },
+      onExit: (err, metadata) => {
+        if (err) {
+          document.getElementById('connection-status').innerHTML = `
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-circle"></i> Error: ${err.message}
+            </div>
+          `;
+        }
+      },
+      onEvent: (eventName, metadata) => {
+        console.log('onEvent', eventName, metadata);
+      },
+      onLoad: () => {
+        console.log('onLoad');
+      }
+    });
+
+    // Handle bank card clicks
+    document.querySelectorAll('.bank-card').forEach(card => {
+      card.addEventListener('click', async () => {
+        try {
+          // Get link token from backend
+          const response = await fetch('http://localhost:5000/api/plaid/create-link-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              institution_id: card.dataset.bank
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            handler.open(data.link_token);
+          } else {
+            throw new Error(data.message || 'Failed to create link token');
+          }
+        } catch (error) {
+          document.getElementById('connection-status').innerHTML = `
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-circle"></i> ${error.message}
+            </div>
+          `;
+        }
+      });
+    });
+
+    // Handle test connection button
+    document.getElementById('test-connection').addEventListener('click', async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/plaid/test-connection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          document.getElementById('test-credentials').innerHTML = `
+            <div class="alert alert-success">
+              <i class="fas fa-check-circle"></i> Test connection successful!
+            </div>
+          `;
+        } else {
+          throw new Error(data.message || 'Test connection failed');
+        }
+      } catch (error) {
+        document.getElementById('test-credentials').innerHTML = `
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> ${error.message}
+          </div>
+        `;
+      }
+=======
+=======
+>>>>>>> 2fb36c7 (Normalize line endings)
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    // Handle logout
+    document.getElementById('logout').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+<<<<<<< HEAD
+>>>>>>> b8dabf134164d3783b37cb09024dc8a452a1962c
+=======
+>>>>>>> 2fb36c7 (Normalize line endings)
+    });
+  </script>
+</body>
+</html>

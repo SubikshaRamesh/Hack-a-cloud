@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTrack - Transactions</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">FinTrack</div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="transactions.html" class="active">Transactions</a>
+            <a href="goals.html">Goals</a>
+            <a href="budget.html">Budget</a>
+            <a href="profile.html">Profile</a>
+        </div>
+        <div class="user-menu">
+            <span id="username"></span>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <main class="transactions-page">
+        <div class="filters">
+            <div class="date-range">
+                <label>Date Range:</label>
+                <select id="date-range">
+                    <option value="7">Last 7 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+            </div>
+            <div class="custom-date-range" style="display: none;">
+                <input type="date" id="start-date">
+                <input type="date" id="end-date">
+            </div>
+            <div class="category-filter">
+                <label>Category:</label>
+                <select id="category">
+                    <option value="">All Categories</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+            </div>
+            <div class="search">
+                <input type="text" id="search" placeholder="Search transactions...">
+            </div>
+        </div>
+
+        <div class="transactions-list">
+            <div class="transactions-header">
+                <div class="date">Date</div>
+                <div class="description">Description</div>
+                <div class="category">Category</div>
+                <div class="amount">Amount</div>
+            </div>
+            <div id="transactions-container"></div>
+        </div>
+
+        <div class="pagination">
+            <button id="prev-page" disabled>Previous</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button id="next-page" disabled>Next</button>
+        </div>
+    </main>
+
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let totalTransactions = [];
+        let filteredTransactions = [];
+
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Load transactions
+        async function loadTransactions() {
+            try {
+                const token = localStorage.getItem('token');
+                const dateRange = document.getElementById('date-range').value;
+                let url = '/api/transactions';
+                
+                if (dateRange === 'custom') {
+                    const startDate = document.getElementById('start-date').value;
+                    const endDate = document.getElementById('end-date').value;
+                    url += `?start_date=${startDate}&end_date=${endDate}`;
+                } else {
+                    url += `?days=${dateRange}`;
+                }
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load transactions');
+                
+                totalTransactions = await response.json();
+                filterTransactions();
+                
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                showNotification('Failed to load transactions', 'error');
+            }
+        }
+
+        // Filter transactions
+        function filterTransactions() {
+            const category = document.getElementById('category').value;
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            
+            filteredTransactions = totalTransactions.filter(transaction => {
+                const matchesCategory = !category || 
+                    (category === 'income' && transaction.amount >= 0) ||
+                    (category === 'expense' && transaction.amount < 0);
+                    
+                const matchesSearch = !searchTerm ||
+                    transaction.description.toLowerCase().includes(searchTerm);
+                    
+                return matchesCategory && matchesSearch;
+            });
+            
+            displayTransactions();
+        }
+
+        // Display transactions
+        function displayTransactions() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageTransactions = filteredTransactions.slice(startIndex, endIndex);
+            
+            const container = document.getElementById('transactions-container');
+            container.innerHTML = pageTransactions.map(transaction => `
+                <div class="transaction-item">
+                    <div class="date">${new Date(transaction.date).toLocaleDateString()}</div>
+                    <div class="description">${transaction.description}</div>
+                    <div class="category">${transaction.category || 'Uncategorized'}</div>
+                    <div class="amount ${transaction.amount >= 0 ? 'positive' : 'negative'}">
+                        $${Math.abs(transaction.amount).toFixed(2)}
+                    </div>
+                </div>
+            `).join('');
+            
+            updatePagination();
+        }
+
+        // Update pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+            document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
+        }
+
+        // Event listeners
+        document.getElementById('date-range').addEventListener('change', (e) => {
+            const customRange = document.querySelector('.custom-date-range');
+            customRange.style.display = e.target.value === 'custom' ? 'block' : 'none';
+            loadTransactions();
+        });
+
+        document.getElementById('category').addEventListener('change', filterTransactions);
+        document.getElementById('search').addEventListener('input', filterTransactions);
+        
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                displayTransactions();
+            }
+        });
+        
+        document.getElementById('next-page').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayTransactions();
+            }
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadTransactions();
+        });
+    </script>
+</body>
+</html> 

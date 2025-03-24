@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+< lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinTrack - Connect Your Bank</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --secondary: #64748b;
+      --background: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar {
+      background-color: var(--card);
+      padding: 1rem 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-weight: bold;
+      font-size: 1.5rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo-icon {
+      margin-right: 0.5rem;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      width: 100%;
+      box-sizing: border-box;
+      flex: 1;
+    }
+    
+    .card {
+      background-color: var(--card);
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    h1, h2, h3 {
+      margin-top: 0;
+      color: var(--text);
+    }
+    
+    p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.2s;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    .btn-secondary {
+      background-color: var(--secondary);
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #4b5563;
+    }
+    
+    .btn-success {
+      background-color: var(--success);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background-color: #0d9668;
+    }
+    
+    .bank-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .bank-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .bank-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .bank-logo {
+      width: 64px;
+      height: 64px;
+      background-color: var(--background);
+      border-radius: 0.375rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    
+    .bank-name {
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .connected-badge {
+      display: inline-block;
+      background-color: var(--success);
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+    }
+    
+    .steps {
+      display: flex;
+      margin: 2rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .step {
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .step.active {
+      color: var(--primary);
+    }
+    
+    .step.completed {
+      color: var(--success);
+    }
+    
+    .step.active::after, .step.completed::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: currentColor;
+    }
+    
+    /* Form Styling */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+    
+    /* Account Selection */
+    .account-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .account-item:hover {
+      background-color: var(--background);
+    }
+    
+    .account-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background-color: #e2e8f0;
+      border-radius: 50%;
+      margin-right: 1rem;
+    }
+    
+    .account-details {
+      flex: 1;
+    }
+    
+    .account-name {
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .account-number {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin: 0;
+    }
+    
+    .account-balance {
+      font-weight: 600;
+      margin-left: 1rem;
+    }
+    
+    .checkbox-container {
+      margin-left: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+    
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    
+    /* Success Styling */
+    .success-icon {
+      font-size: 4rem;
+      color: var(--success);
+      text-align: center;
+      margin: 2rem 0;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    /* Step Navigation */
+    .step-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    /* Loader/Animation */
+    .loader-container {
+      text-align: center;
+      padding: 3rem 0;
+    }
+    
+    .loader {
+      display: inline-block;
+      width: 80px;
+      height: 80px;
+      border: 6px solid var(--border);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Auth Form Styling */
+    .auth-form {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 2rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: #f8fafc;
+    }
+    
+    .secure-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      background-color: #f0fdf4;
+      border: 1px solid #dcfce7;
+      border-radius: 0.375rem;
+      color: var(--success);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .secure-badge svg {
+      margin-right: 0.5rem;
+    }
+    
+    .bank-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .bank-header .bank-logo {
+      margin-right: 1rem;
+      margin-bottom: 0;
+    }
+    
+    .bank-header h2 {
+      margin: 0;
+    }
+  </style>
+</head>
+<>
+  <nav class="navbar">
+    <div class="logo">
+      <span class="logo-icon"></span> FinTrack
+    </div>
+    <div>
+      <button class="btn">Dashboard</button>
+    </div>
+  </nav>
+  
+  <div class="container">
+    <div class="card">
+      <h1>Connect Your Bank Accounts</h1>
+      <p>Link your financial accounts to automatically import transactions and enhance your financial tracking.</p>
+      
+      <div class="steps">
+        <div class="step active" data-step="1" onclick="showStep(1)">1. Select Bank</div>
+        <div class="step" data-step="2" onclick="showStep(2)">2. Authenticate</div>
+        <div class="step" data-step="3" onclick="showStep(3)">3. Choose Accounts</div>
+        <div class="step" data-step="4" onclick="showStep(4)">4. Complete</div>
+      </div>
+      
+      <!-- Step 1: Select Bank -->
+<div id="step1" class="tab-content active">
+  <h2>Popular Banks</h2>
+  <div class="bank-grid">
+    <div class="bank-card" onclick="selectBank('State Bank of India')">
+      <div class="bank-logo">
+        <img src="sbi.png" alt="SBI Logo">
+      </div>
+      <div class="bank-name">SBI</div>
+    </div>
+    <div class="bank-card" onclick="selectBank('Indian Bank')">
+      <div class="bank-logo">
+        <img src="indian.png" alt="Indian Bank Logo">
+      </div>
+      <div class="bank-name">Indian Bank</div>
+    </div>
+    <div class="bank-card" onclick="selectBank('Canara Bank')">
+      <div class="bank-logo">
+        <img src="canara.png" alt="Canara Bank Logo">
+      </div>
+      <div class="bank-name">CB</div>
+    </div>
+    <div class="bank-card" onclick="selectBank('City Union Bank')">
+      <div class="bank-logo">
+        <img src="cub.png" alt="City Union Bank Logo">
+      </div>
+      <div class="bank-name">CUB</div>
+    </div>
+    <div class="bank-card" onclick="selectBank('Indian Overseas Bank')">
+      <div class="bank-logo">
+        <img src="iob.png" alt="IOB Logo">
+      </div>
+      <div class="bank-name">IOB</div>
+    </div>
+    <div class="bank-card" onclick="selectBank('HDFC Bank')">
+      <div class="bank-logo">
+        <img src="hdfc.png" alt="HDFC Logo">
+      </div>
+      <div class="bank-name">HDFC</div>
+    </div>
+    <div class="bank-card" onclick="selectBank('ICICI Bank')">
+      <div class="bank-logo">
+        <img src="icici.png" alt="ICICI Logo">
+      </div>
+      <div class="bank-name">ICICI</div>
+    </div>
+    <div class="bank-card" onclick="selectBank('Axis Bank')">
+      <div class="bank-logo">
+        <img src="axis.png" alt="Axis Bank Logo">
+      </div>
+      <div class="bank-name">Axis</div>
+    </div>
+  </div>
+</div>
+        <h2>Search for your bank</h2>
+        <input type="text" placeholder="Search by bank name..." id="bankSearch" onkeyup="searchBanks()">
+        
+        <div id="searchResults" class="bank-grid" style="margin-top: 1rem;">
+          <!-- Search results will appear here -->
+        </div>
+        
+        <h2>Recently Connected</h2>
+        <div class="recent-activity">
+          <div class="activity-item">
+            <div class="activity-icon">✅</div>
+            <div class="activity-content">
+              <h3 class="activity-title">Capital One connected successfully</h3>
+              <p class="activity-time">Today at 2:15 PM</p>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon">❌</div>
+            <div class="activity-content">
+              <h3 class="activity-title">Chase connection failed</h3>
+              <p class="activity-time">Yesterday at 10:30 AM</p>
+            </div>
+          </div>
+        </div>
+        
+        <h2>Can't find your bank?</h2>
+        <p>If your bank isn't listed, you can add transactions manually or try our alternative connection methods.</p>
+        <button class="btn btn-secondary">Manual Entry</button>
+        <button class="btn btn-secondary" style="margin-left: 0.5rem;">Upload Bank Statement</button>
+      </div>
+      
+<!-- Step 2: Authenticate -->
+<div id="step2" class="tab-content">
+  <div class="bank-header">
+    <div class="bank-logo">🏦</div>
+    <h2 id="selectedBankName">Bank Name</h2>
+  </div>
+ 
+  <div class="auth-form">
+    <div class="secure-badge">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      Secure Connection
+    </div>
+   
+    <p>Please enter your online banking credentials for <span id="bankNameAuth">your bank</span>. FinTrack uses secure token-based authentication and never stores your login information.</p>
+   
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username">
+    </div>
+   
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password">
+    </div>
+   
+    <div class="form-group">
+      <input type="checkbox" id="remember" name="remember">
+      <label for="remember" style="display: inline-block; margin-left: 0.5rem;">Remember this connection</label>
+    </div>
+  </div>
+ 
+  <div class="step-nav">
+    <button class="btn btn-secondary" onclick="showStep(1)">Back</button>
+    <button class="btn" onclick="authenticateBank()">Connect Securely</button>
+  </div>
+</div>
+
+      <!-- Step 3: Choose Accounts -->
+      <div id="step3" class="tab-content">
+        <h2>Select Accounts to Connect</h2>
+        <p>Choose which accounts you'd like to sync with FinTrack. You can select multiple accounts.</p>
+        
+        <div class="account-list">
+          <div class="account-item">
+            <div class="account-icon">💳</div>
+            <div class="account-details">
+              <h3 class="account-name">Premium Checking</h3>
+              <p class="account-number">••••3456</p>
+            </div>
+            <div class="account-balance">&#8377; 9,54,148</div>
+            <div class="checkbox-container">
+              <input type="checkbox" checked>
+            </div>
+          </div>
+          
+          <div class="account-item">
+            <div class="account-icon">💰</div>
+            <div class="account-details">
+              <h3 class="account-name">High-Yield Savings</h3>
+              <p class="account-number">••••7890</p>
+            </div>
+            <div class="account-balance">&#8377;4,67,430</div>
+            <div class="checkbox-container">
+              <input type="checkbox" checked>
+            </div>
+          </div>
+          
+          <div class="account-item">
+            <div class="account-icon">💳</div>
+            <div class="account-details">
+              <h3 class="account-name">Rewards Credit Card</h3>
+              <p class="account-number">••••5678</p>
+            </div>
+            <div class="account-balance">&#8377; 4,675 </div>
+            <div class="checkbox-container">
+              <input type="checkbox" checked>
+            </div>
+          </div>
+          
+          <div class="account-item">
+            <div class="account-icon">🏠</div>
+            <div class="account-details">
+              <h3 class="account-name">Mortgage Loan</h3>
+              <p class="account-number">••••1357</p>
+            </div>
+            <div class="account-balance">&#8377; 23,140   </div>
+            <div class="checkbox-container">
+              <input type="checkbox">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 2rem;">
+          <h3>Data Synchronization Options</h3>
+          <p>Choose how you want your account data to be synchronized.</p>
+          
+          <div style="margin-bottom: 1rem;">
+            <input type="radio" id="sync-auto" name="sync-option" checked>
+            <label for="sync-auto" style="display: inline;">Automatic daily sync</label>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <input type="radio" id="sync-manual" name="sync-option">
+            <label for="sync-manual" style="display: inline;">Manual sync only</label>
+          </div>
+          
+          <div>
+            <input type="checkbox" id="sync-notifications" checked>
+            <label for="sync-notifications" style="display: inline;">Send notifications when new transactions are imported</label>
+          </div>
+        </div>
+        
+        <div class="step-nav">
+          <button class="btn btn-secondary" onclick="showStep(2)">Back</button>
+          <button class="btn" onclick="connectAccounts()">Connect Selected Accounts</button>
+        </div>
+      </div>
+      
+      <!-- Step 4: Complete -->
+      <div id="step4" class="tab-content">
+        <div class="text-center">
+          <div class="success-icon">✅</div>
+          <h2>Connection Successful!</h2>
+          <p>Your accounts have been successfully connected to FinTrack. Your transaction data is being imported now.</p>
+          
+          <div style="max-width: 500px; margin: 2rem auto; padding: 1rem; background-color: #f0fdf4; border-radius: 0.5rem; border: 1px solid #dcfce7;">
+            <h3 style="color: var(--success); margin-top: 0;">3 Accounts Connected</h3>
+            <p>We're importing transactions from the last 90 days. This might take a few minutes.</p>
+            <div style="height: 8px; background-color: #e2e8f0; border-radius: 4px; margin: 1rem 0;">
+              <div style="height: 100%; width: 70%; background-color: var(--success); border-radius: 4px;"></div>
+            </div>
+            <p style="font-size: 0.875rem; color: var(--text-secondary);">70% complete - Estimated time: 2 minutes</p>
+          </div>
+          
+          <h3>What would you like to do next?</h3>
+          <div style="margin: 2rem 0;">
+            <button class="btn btn-success">Go to Dashboard</button>
+            <button class="btn btn-secondary" style="margin-left: 1rem;">Set Up Budget Categories</button>
+            <button class="btn btn-secondary" style="margin-left: 1rem;">Connect Another Bank</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Secure Connection</h2>
+      <p>Your security is our top priority. FinTrack uses bank-level encryption and never stores your login credentials. We use secure token-based authentication to connect to your financial institutions.</p>
+      <p>Learn more about our <a href="#" style="color: var(--primary);">security practices</a> and <a href="#" style="color: var(--primary);">privacy policy</a>.</p>
+    </div>
+  </div>
+  
+  <script>
+    // Show specific step
+    function showStep(stepNumber) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab
+      document.getElementById('step' + stepNumber).classList.add('active');
+      
+      // Update step classes
+      document.querySelectorAll('.step').forEach(step => {
+        step.classList.remove('active');
+        step.classList.remove('completed');
+        
+        const stepData = parseInt(step.getAttribute('data-step'));
+        
+        if (stepData === stepNumber) {
+          step.classList.add('active');
+        } else if (stepData < stepNumber) {
+          step.classList.add('completed');
+        }
+      });
+    }
+    
+    // Bank selection function
+    function selectBank(bankName) {
+      document.getElementById('selectedBankName').textContent = bankName;
+      document.getElementById('bankNameAuth').textContent = bankName;
+      showStep(2);
+    }
+    
+    // Search banks function
+    function searchBanks() {
+      const searchTerm = document.getElementById('bankSearch').value.toLowerCase();
+      
+      // This would typically be an API call or a more complex search
+      // Simplified for demo purposes
+      const demoResults = [
+        { name: 'First National Bank' },
+        { name: 'Community Credit Union' },
+        { name: 'Regional Savings & Loan' }
+      ].filter(bank => bank.name.toLowerCase().includes(searchTerm));
+      
+      const resultsContainer = document.getElementById('searchResults');
+      resultsContainer.innerHTML = '';
+      
+      if (searchTerm.length > 0 && demoResults.length > 0) {
+        demoResults.forEach(bank => {
+          const bankCard = document.createElement('div');
+          bankCard.className = 'bank-card';
+          bankCard.onclick = function() { selectBank(bank.name); };
+          
+          bankCard.innerHTML = `
+            <div class="bank-logo">🏦</div>
+            <div class="bank-name">${bank.name}</div>
+          `;
+          
+          resultsContainer.appendChild(bankCard);
+        });
+      }
+    }
+    
+    // Authenticate bank function 
+    function authenticateBank() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      // In a real app, this would be a secure OAuth or similar process
+      if (username && password) {
+        // Show loading state (simplified for demo)
+        const step2 = document.getElementById('step2');
+        const originalContent = step2.innerHTML;
+        
+        step2.innerHTML = `
+          <div class="loader-container">
+            <div class="loader"></div>
+            <h3>Connecting to your bank</h3>
+            <p>Please wait while we securely connect to your bank. This may take a few moments.</p>
+          </div>
+        `;
+        
+        // Simulate API delay
+        setTimeout(() => {
+          step2.innerHTML = originalContent;
+          showStep(3);
+        }, 2000);
+      } else {
+        alert('Please enter your username and password');
+      }
+    }
+    
+    // Connect accounts function
+    function connectAccounts() {
+      // Show loading state (simplified for demo)
+      const step3 = document.getElementById('step3');
+      const originalContent = step3.innerHTML;
+      
+      step3.innerHTML = `
+        <div class="loader-container">
+          <div class="loader"></div>
+          <h3>Setting up your accounts</h3>
+          <p>We're establishing a secure connection to your accounts. This may take a few moments.</p>
+        </div>
+      `;
+      
+      // Simulate API delay
+      setTimeout(() => {
+        step3.innerHTML = originalContent;
+        showStep(4);
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
